@@ -15,82 +15,60 @@ export function FoodCard({ item, onEdit, onDelete, onQuantityChange }: Props) {
 
   return (
     <div
-      className={`relative rounded-2xl p-4 flex flex-col items-center gap-2 shadow-sm border-2 transition-all hover:shadow-md cursor-pointer group ${
-        isEmpty
-          ? 'border-red-300 bg-red-50 opacity-70'
-          : isLow
-          ? 'border-amber-300 bg-amber-50'
-          : 'border-transparent bg-white'
-      }`}
-      style={{ minWidth: 0 }}
+      style={{
+        position: 'relative',
+        borderRadius: 16,
+        padding: '12px 8px 8px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 6,
+        background: isEmpty ? '#fff1f2' : isLow ? '#fffbeb' : 'white',
+        border: `2px solid ${isEmpty ? '#fecdd3' : isLow ? '#fde68a' : 'transparent'}`,
+        boxShadow: '0 1px 4px rgba(0,0,0,0.07)',
+        transition: 'box-shadow 0.15s',
+        cursor: 'pointer',
+      }}
+      className="group hover:shadow-md"
     >
-      {/* Low stock badge */}
-      {isLow && !isEmpty && (
-        <div className="absolute top-2 right-2 bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-          Wenig
-        </div>
-      )}
+      {/* Status badge */}
       {isEmpty && (
-        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-          Leer
-        </div>
+        <div style={{ position: 'absolute', top: 6, right: 6, background: '#ef4444', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 99 }}>Leer</div>
+      )}
+      {isLow && !isEmpty && (
+        <div style={{ position: 'absolute', top: 6, right: 6, background: '#f59e0b', color: 'white', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 99 }}>Wenig</div>
       )}
 
-      {/* Category badge */}
-      <div className="absolute top-2 left-2 text-xs text-gray-400">
+      {/* Category emoji */}
+      <div style={{ position: 'absolute', top: 7, left: 7, fontSize: 11, opacity: 0.6 }}>
         {CATEGORIES[item.category].emoji}
       </div>
 
-      {/* Illustration */}
-      <div
-        className="mt-2"
-        onClick={() => onEdit(item)}
-        title="Bearbeiten"
-      >
-        <FoodIllustration icon={item.icon} color={item.color} size={72} />
-      </div>
-
-      {/* Name */}
-      <div className="font-semibold text-gray-800 text-sm text-center leading-tight">
-        {item.name}
+      {/* Illustration with name on label */}
+      <div onClick={() => onEdit(item)} style={{ marginTop: 4 }}>
+        <FoodIllustration icon={item.icon} color={item.color} label={item.name} size={76} />
       </div>
 
       {/* Quantity controls */}
-      <div className="flex items-center gap-2 mt-1">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
         <button
           onClick={() => onQuantityChange(item.id, -1)}
-          className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg leading-none transition-colors"
-          aria-label="Reduzieren"
-        >
-          −
-        </button>
-        <span className="text-sm font-bold text-gray-700 min-w-[3rem] text-center">
+          style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#f3f4f6', cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >−</button>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#374151', minWidth: 52, textAlign: 'center' }}>
           {item.quantity} {item.unit}
         </span>
         <button
           onClick={() => onQuantityChange(item.id, 1)}
-          className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-lg leading-none transition-colors"
-          aria-label="Erhöhen"
-        >
-          +
-        </button>
+          style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#f3f4f6', cursor: 'pointer', fontWeight: 700, fontSize: 16, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >+</button>
       </div>
 
-      {/* Actions (show on hover) */}
-      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button
-          onClick={() => onEdit(item)}
-          className="text-xs text-blue-500 hover:text-blue-700 underline"
-        >
-          Bearbeiten
-        </button>
-        <span className="text-gray-300">|</span>
-        <button
-          onClick={() => onDelete(item.id)}
-          className="text-xs text-red-400 hover:text-red-600 underline"
-        >
-          Löschen
-        </button>
+      {/* Edit/Delete on hover */}
+      <div style={{ display: 'flex', gap: 8, opacity: 0 }} className="group-hover:opacity-100" >
+        <button onClick={() => onEdit(item)} style={{ fontSize: 11, color: '#3b82f6', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Bearbeiten</button>
+        <span style={{ color: '#d1d5db', fontSize: 11 }}>|</span>
+        <button onClick={() => onDelete(item.id)} style={{ fontSize: 11, color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}>Löschen</button>
       </div>
     </div>
   );

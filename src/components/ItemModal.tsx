@@ -3,22 +3,29 @@ import type { FoodItem, Category } from '../types';
 import { CATEGORIES, UNITS } from '../types';
 import { FoodIllustration } from './FoodIllustration';
 
-const ICON_OPTIONS = [
-  { value: 'flour', label: 'Mehlsack' },
-  { value: 'sugar', label: 'Zuckerdose' },
-  { value: 'pasta', label: 'Nudelpackung' },
-  { value: 'oil', label: 'Ölflasche' },
-  { value: 'milk', label: 'Milchkarton' },
-  { value: 'can', label: 'Konserve' },
-  { value: 'rice', label: 'Reisbeutel' },
-  { value: 'salt', label: 'Salzstreuer' },
-  { value: 'default', label: 'Karton' },
+export const ICON_OPTIONS = [
+  { value: 'flour',   label: 'Mehlsack',    emoji: '🌾' },
+  { value: 'sugar',   label: 'Zuckerdose',  emoji: '🍬' },
+  { value: 'pasta',   label: 'Nudeln',      emoji: '🍝' },
+  { value: 'oil',     label: 'Ölflasche',   emoji: '🫒' },
+  { value: 'milk',    label: 'Milchkarton', emoji: '🥛' },
+  { value: 'can',     label: 'Dose',        emoji: '🥫' },
+  { value: 'rice',    label: 'Reisbeutel',  emoji: '🌾' },
+  { value: 'salt',    label: 'Salzstreuer', emoji: '🧂' },
+  { value: 'jar',     label: 'Glas',        emoji: '🍯' },
+  { value: 'bottle',  label: 'Flasche',     emoji: '🍶' },
+  { value: 'box',     label: '3D-Karton',   emoji: '📦' },
+  { value: 'default', label: 'Karton',      emoji: '📦' },
 ];
 
-const COLOR_OPTIONS = [
-  '#fef3c7', '#ffe4e6', '#fef9c3', '#d1fae5',
-  '#eff6ff', '#fee2e2', '#f0fdf4', '#e0f2fe',
-  '#fce7f3', '#f3e8ff', '#ecfdf5', '#fff7ed',
+const COLOR_PRESETS = [
+  '#fef3c7', '#fde68a', '#fef9c3',
+  '#ffe4e6', '#fecdd3', '#fce7f3',
+  '#d1fae5', '#a7f3d0', '#ecfdf5',
+  '#eff6ff', '#dbeafe', '#e0f2fe',
+  '#f3e8ff', '#ede9fe', '#fdf4ff',
+  '#fff7ed', '#fed7aa', '#fdba74',
+  '#f1f5f9', '#e2e8f0', '#f9fafb',
 ];
 
 interface Props {
@@ -38,8 +45,9 @@ export function ItemModal({ item, onSave, onClose }: Props) {
   const [unit, setUnit] = useState('Packung');
   const [minQuantity, setMinQuantity] = useState(1);
   const [icon, setIcon] = useState('default');
-  const [color, setColor] = useState('#f3f4f6');
+  const [color, setColor] = useState('#fef3c7');
   const [expiryDate, setExpiryDate] = useState('');
+  const [customColor, setCustomColor] = useState('#fef3c7');
 
   useEffect(() => {
     if (item) {
@@ -50,6 +58,7 @@ export function ItemModal({ item, onSave, onClose }: Props) {
       setMinQuantity(item.minQuantity);
       setIcon(item.icon);
       setColor(item.color);
+      setCustomColor(item.color);
       setExpiryDate(item.expiryDate ?? '');
     }
   }, [item]);
@@ -73,164 +82,165 @@ export function ItemModal({ item, onSave, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4"
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-800">
+      <div style={{ background: 'white', borderRadius: 20, boxShadow: '0 20px 60px rgba(0,0,0,0.2)', width: '100%', maxWidth: 480, maxHeight: '92vh', overflowY: 'auto' }}>
+        <div style={{ padding: 24 }}>
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#111' }}>
               {item ? 'Artikel bearbeiten' : 'Neuer Artikel'}
             </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-            >
-              ×
-            </button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 24, color: '#9ca3af', lineHeight: 1 }}>×</button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            {/* Preview */}
-            <div className="flex justify-center py-2">
-              <FoodIllustration icon={icon} color={color} size={80} />
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Live Preview */}
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '8px 0 4px', background: '#f9fafb', borderRadius: 12 }}>
+              <FoodIllustration icon={icon} color={color} label={name || 'Vorschau'} size={100} />
             </div>
 
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Name *</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="z.B. Weizenmehl"
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '8px 12px', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
                 required
               />
             </div>
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kategorie</label>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Kategorie</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value as Category)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '8px 12px', fontSize: 14, outline: 'none', background: 'white' }}
               >
                 {(Object.entries(CATEGORIES) as [Category, { label: string; emoji: string }][]).map(([key, cat]) => (
-                  <option key={key} value={key}>
-                    {cat.emoji} {cat.label}
-                  </option>
+                  <option key={key} value={key}>{cat.emoji} {cat.label}</option>
                 ))}
               </select>
             </div>
 
             {/* Quantity + Unit */}
-            <div className="grid grid-cols-2 gap-3">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Menge</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Menge</label>
                 <input
-                  type="number"
-                  value={quantity}
-                  min={0}
-                  step={0.5}
+                  type="number" value={quantity} min={0} step={0.5}
                   onChange={(e) => setQuantity(parseFloat(e.target.value) || 0)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                  style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '8px 12px', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Einheit</label>
+                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>Einheit</label>
                 <select
-                  value={unit}
-                  onChange={(e) => setUnit(e.target.value)}
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                  value={unit} onChange={(e) => setUnit(e.target.value)}
+                  style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '8px 12px', fontSize: 14, outline: 'none', background: 'white' }}
                 >
-                  {UNITS.map((u) => (
-                    <option key={u} value={u}>{u}</option>
-                  ))}
+                  {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                 </select>
               </div>
             </div>
 
             {/* Min quantity */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Mindestmenge <span className="text-gray-400 font-normal">(Warngrenze)</span>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>
+                Mindestmenge <span style={{ fontWeight: 400, color: '#9ca3af' }}>(Warngrenze)</span>
               </label>
               <input
-                type="number"
-                value={minQuantity}
-                min={0}
-                step={0.5}
+                type="number" value={minQuantity} min={0} step={0.5}
                 onChange={(e) => setMinQuantity(parseFloat(e.target.value) || 0)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '8px 12px', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
-            {/* Expiry date */}
+            {/* Expiry */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ablaufdatum <span className="text-gray-400 font-normal">(optional)</span>
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 4 }}>
+                Ablaufdatum <span style={{ fontWeight: 400, color: '#9ca3af' }}>(optional)</span>
               </label>
               <input
-                type="date"
-                value={expiryDate}
+                type="date" value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-400"
+                style={{ width: '100%', border: '1.5px solid #e5e7eb', borderRadius: 10, padding: '8px 12px', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
               />
             </div>
 
-            {/* Icon selection */}
+            {/* Illustration picker */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Illustration</label>
-              <div className="grid grid-cols-3 gap-2">
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 8 }}>Packungsform</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
                 {ICON_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => setIcon(opt.value)}
-                    className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all ${
-                      icon === opt.value ? 'border-blue-400 bg-blue-50' : 'border-gray-100 hover:border-gray-200'
-                    }`}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                      padding: '6px 4px', borderRadius: 10,
+                      border: `2px solid ${icon === opt.value ? '#3b82f6' : '#f3f4f6'}`,
+                      background: icon === opt.value ? '#eff6ff' : 'white',
+                      cursor: 'pointer', transition: 'border-color 0.1s',
+                    }}
                   >
-                    <FoodIllustration icon={opt.value} color={color} size={40} />
-                    <span className="text-xs text-gray-500">{opt.label}</span>
+                    <FoodIllustration icon={opt.value} color={color} label="" size={36} />
+                    <span style={{ fontSize: 9, color: '#6b7280', textAlign: 'center', lineHeight: 1.2 }}>{opt.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Color selection */}
+            {/* Color picker */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Farbe</label>
-              <div className="flex flex-wrap gap-2">
-                {COLOR_OPTIONS.map((c) => (
+              <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 8 }}>Packungsfarbe</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                {COLOR_PRESETS.map((c) => (
                   <button
                     key={c}
                     type="button"
-                    onClick={() => setColor(c)}
-                    className={`w-8 h-8 rounded-full border-2 transition-transform hover:scale-110 ${
-                      color === c ? 'border-gray-700 scale-110' : 'border-transparent'
-                    }`}
-                    style={{ backgroundColor: c }}
-                    aria-label={c}
+                    onClick={() => { setColor(c); setCustomColor(c); }}
+                    style={{
+                      width: 28, height: 28, borderRadius: '50%', border: `2.5px solid ${color === c ? '#374151' : 'transparent'}`,
+                      background: c, cursor: 'pointer',
+                      transform: color === c ? 'scale(1.15)' : 'scale(1)',
+                      transition: 'transform 0.1s',
+                      outline: color === c ? '2px solid white' : 'none',
+                      outlineOffset: -4,
+                    }}
                   />
                 ))}
+              </div>
+              {/* Custom color input */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <input
+                  type="color"
+                  value={customColor}
+                  onChange={(e) => { setCustomColor(e.target.value); setColor(e.target.value); }}
+                  style={{ width: 36, height: 36, border: 'none', borderRadius: 8, cursor: 'pointer', padding: 2, background: 'none' }}
+                />
+                <span style={{ fontSize: 12, color: '#6b7280' }}>Eigene Farbe wählen</span>
+                <code style={{ fontSize: 11, color: '#9ca3af', background: '#f3f4f6', padding: '2px 6px', borderRadius: 4 }}>{color}</code>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3 pt-2">
+            <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
               <button
-                type="button"
-                onClick={onClose}
-                className="flex-1 py-2 px-4 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium"
+                type="button" onClick={onClose}
+                style={{ flex: 1, padding: '10px 16px', borderRadius: 12, border: '1.5px solid #e5e7eb', background: 'white', color: '#374151', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
               >
                 Abbrechen
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2 px-4 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors text-sm font-bold"
+                style={{ flex: 1, padding: '10px 16px', borderRadius: 12, border: 'none', background: '#3b82f6', color: 'white', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}
               >
                 {item ? 'Speichern' : 'Hinzufügen'}
               </button>
