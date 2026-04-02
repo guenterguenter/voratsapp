@@ -142,7 +142,7 @@ export function FoodCard({ item, onEdit, onDelete, onQuantityChange }: Props) {
           transition: dragging ? 'none' : 'transform 0.2s',
         }}
       >
-        <FoodIllustration icon={item.icon} color={item.color} label={item.name} size={76} />
+        <FoodIllustration icon={item.icon} color={item.color} label={item.name} size={54} />
       </div>
 
       {/* Quantity display */}

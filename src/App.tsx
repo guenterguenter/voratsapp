@@ -283,7 +283,7 @@ export default function App() {
                 )}
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
                   gap: 12,
                 }}>
                   {catItems.map((item) => (
