@@ -1,30 +1,41 @@
 /**
- * Returns true when the quantity/unit combo is in "small" territory
- * where velocity-based stepping applies (under 1 L/kg → shown as ml/g)
+ * Returns true for units where velocity-based stepping applies:
+ * all L/kg quantities and g/ml.
  */
-function isSmallFluid(qty: number, unit: string): boolean {
-  if (unit === 'ml' || unit === 'g') return true;
-  if ((unit === 'L' || unit === 'kg') && qty < 1) return true;
-  return false;
+export function isFluid(unit: string): boolean {
+  return unit === 'L' || unit === 'kg' || unit === 'ml' || unit === 'g';
 }
 
 /**
- * Velocity-based step for small fluid quantities (g / ml).
+ * Velocity-based step for L/kg/ml/g.
  * velocity = px/ms of the current drag motion.
- *   slow  (< 0.4 px/ms)  →  10 g/ml
- *   medium(0.4–1.2 px/ms) → 25 g/ml
- *   fast  (> 1.2 px/ms)   → 50 g/ml
- * For L/kg these map back to 0.01 / 0.025 / 0.05
+ *
+ * Under 1 L/kg (shown as ml/g):
+ *   slow  → 10 g/ml   medium → 25 g/ml   fast → 50 g/ml
+ *
+ * 1–5 L/kg:
+ *   slow  → 0.1        medium → 0.5        fast → 1
+ *
+ * 5–10 L/kg:
+ *   slow  → 0.5        medium → 1          fast → 2
+ *
+ * ≥ 10 L/kg:
+ *   slow  → 1          medium → 2          fast → 5
  */
-export function getVelocityStep(velocity: number, unit: string): number {
-  let step: number;
-  if (velocity > 1.2)      step = 50;
-  else if (velocity > 0.4) step = 25;
-  else                     step = 10;
+export function getVelocityStep(velocity: number, qty: number, unit: string): number {
+  const slow   = velocity < 0.4;
+  const fast   = velocity > 1.2;
 
-  // convert back to L/kg if needed
-  if (unit === 'L' || unit === 'kg') return step / 1000;
-  return step;
+  // g / ml  or  L/kg shown as ml/g (< 1)
+  if (unit === 'ml' || unit === 'g' || ((unit === 'L' || unit === 'kg') && qty < 1)) {
+    const step = fast ? 50 : slow ? 10 : 25;
+    return (unit === 'L' || unit === 'kg') ? step / 1000 : step;
+  }
+
+  // L / kg  ≥ 1
+  if (qty >= 10) return fast ? 5   : slow ? 1   : 2;
+  if (qty >= 5)  return fast ? 2   : slow ? 0.5 : 1;
+                 return fast ? 1   : slow ? 0.1 : 0.5;
 }
 
 /** Dynamic step size based on current quantity and unit (for +/- buttons) */

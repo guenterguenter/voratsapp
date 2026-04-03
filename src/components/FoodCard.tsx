@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import type { FoodItem } from '../types';
 import { CATEGORIES } from '../types';
 import { FoodIllustration } from './FoodIllustration';
-import { getStep, getVelocityStep, isSmallFluid, formatQty, formatDelta } from '../utils';
+import { getStep, getVelocityStep, isFluid, formatQty, formatDelta } from '../utils';
 
 interface Props {
   item: FoodItem;
@@ -51,10 +51,10 @@ export function FoodCard({ item, onEdit, onDelete, onQuantityChange }: Props) {
     velPoints.current.push({ y: clientY, t: Date.now() });
     if (velPoints.current.length > 4) velPoints.current.shift();
 
-    // choose step: velocity-based for small fluids, quantity-based otherwise
+    // choose step: velocity-based for all L/kg/ml/g, quantity-based for discrete
     const velocity = calcVelocity();
-    const step = isSmallFluid(item.quantity, item.unit)
-      ? getVelocityStep(velocity, item.unit)
+    const step = isFluid(item.unit)
+      ? getVelocityStep(velocity, item.quantity, item.unit)
       : getStep(item.quantity, item.unit);
 
     const segments = Math.round(dy / STEP_PX);
