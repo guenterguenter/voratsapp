@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import type { FoodItem } from '../types';
 import { CATEGORIES } from '../types';
 import { FoodIllustration } from './FoodIllustration';
-import { getStep, formatQty, formatDelta } from '../utils';
+import { getStep, getVelocityStep, isSmallFluid, formatQty, formatDelta } from '../utils';
 
 interface Props {
   item: FoodItem;
@@ -18,15 +18,26 @@ export function FoodCard({ item, onEdit, onDelete, onQuantityChange }: Props) {
   const isEmpty = item.quantity <= 0;
 
   const dragStartY = useRef<number | null>(null);
-  const dragActual = useRef(0);   // actual quantity delta (float)
+  const dragActual = useRef(0);
   const hasDragged = useRef(false);
+  // velocity tracking: last 3 pointer events
+  const velPoints = useRef<{ y: number; t: number }[]>([]);
   const [dragging, setDragging] = useState(false);
-  const [liveActual, setLiveActual] = useState(0); // for rendering
+  const [liveActual, setLiveActual] = useState(0);
+
+  function calcVelocity(): number {
+    const pts = velPoints.current;
+    if (pts.length < 2) return 0;
+    const a = pts[0], b = pts[pts.length - 1];
+    const dt = b.t - a.t;
+    return dt > 0 ? Math.abs(b.y - a.y) / dt : 0; // px/ms
+  }
 
   function startDrag(clientY: number) {
     dragStartY.current = clientY;
     dragActual.current = 0;
     hasDragged.current = false;
+    velPoints.current = [{ y: clientY, t: Date.now() }];
     setDragging(true);
     setLiveActual(0);
   }
@@ -35,7 +46,17 @@ export function FoodCard({ item, onEdit, onDelete, onQuantityChange }: Props) {
     if (dragStartY.current === null) return;
     const dy = dragStartY.current - clientY; // up = positive
     if (Math.abs(dy) > 5) hasDragged.current = true;
-    const step = getStep(item.quantity, item.unit);
+
+    // track velocity
+    velPoints.current.push({ y: clientY, t: Date.now() });
+    if (velPoints.current.length > 4) velPoints.current.shift();
+
+    // choose step: velocity-based for small fluids, quantity-based otherwise
+    const velocity = calcVelocity();
+    const step = isSmallFluid(item.quantity, item.unit)
+      ? getVelocityStep(velocity, item.unit)
+      : getStep(item.quantity, item.unit);
+
     const segments = Math.round(dy / STEP_PX);
     const actual = segments * step;
     dragActual.current = actual;
@@ -46,6 +67,7 @@ export function FoodCard({ item, onEdit, onDelete, onQuantityChange }: Props) {
     if (dragStartY.current === null) return;
     const delta = dragActual.current;
     dragStartY.current = null;
+    velPoints.current = [];
     setDragging(false);
     setLiveActual(0);
     if (delta !== 0) onQuantityChange(item.id, delta);
