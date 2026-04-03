@@ -3,6 +3,7 @@ import type { FoodItem, Category } from './types';
 import { CATEGORIES, DEFAULT_ITEMS } from './types';
 import { FoodCard } from './components/FoodCard';
 import { ItemModal } from './components/ItemModal';
+import { formatQty, getStep } from './utils';
 import './index.css';
 
 const STORAGE_KEY = 'voratsapp_items';
@@ -348,9 +349,9 @@ export default function App() {
                       <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: '#fee2e2', color: '#991b1b', fontWeight: 600 }}>Leer</span>
                     )}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-                      <button onClick={() => handleQuantityChange(item.id, -1)} style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#f3f4f6', cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>−</button>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: '#374151', minWidth: 72, textAlign: 'center' }}>{item.quantity} {item.unit}</span>
-                      <button onClick={() => handleQuantityChange(item.id, 1)} style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#f3f4f6', cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>+</button>
+                      <button onClick={() => handleQuantityChange(item.id, -getStep(item.quantity, item.unit))} style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#f3f4f6', cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>−</button>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: '#374151', minWidth: 72, textAlign: 'center' }}>{formatQty(item.quantity, item.unit)}</span>
+                      <button onClick={() => handleQuantityChange(item.id, getStep(item.quantity, item.unit))} style={{ width: 26, height: 26, borderRadius: '50%', border: 'none', background: '#f3f4f6', cursor: 'pointer', fontWeight: 700, fontSize: 16 }}>+</button>
                     </div>
                     <button onClick={() => handleEdit(item)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', fontSize: 18 }} title="Bearbeiten">✎</button>
                     <button onClick={() => handleDelete(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fca5a5', fontSize: 16 }} title="Löschen">✕</button>
