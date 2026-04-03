@@ -58,7 +58,6 @@ export function getStep(qty: number, unit: string): number {
   return 1;
 }
 
-export { isSmallFluid };
 
 /** Smart display: L→ml and kg→g when below 1 */
 export function formatQty(qty: number, unit: string): string {
